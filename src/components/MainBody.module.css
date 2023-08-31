@@ -1,0 +1,18 @@
+.body{
+    background-color: aquamarine;
+    margin: 1.5rem 5%;
+}
+
+.container{
+    margin: 1.5rem 5%;
+    padding: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+
+}
+
+.items{
+    background-color: bisque;
+    border: 1px solid black;
+}
