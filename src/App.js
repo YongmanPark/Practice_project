@@ -1,33 +1,63 @@
-import { useEffect, useState, useId } from "react";
-import {firebase} from './firebaseConfig';
-import { collection, getDocs } from 'firebase/firestore';
-import Login from "./Login";
-
-
+import { useEffect, useId, useState } from "react";
+import { db } from "./firebase-config";
+import { addDoc, collection, getDocs, doc, updateDoc } from "firebase/firestore";
 
 function App() {
+  const [users, setUsers] = useState([]);
+  const [newName, setNewName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  const [userId, setUserId] = useState('');
-  const userCollection = collection(firebase, 'users');
-  const uKey = useId();
-  useEffect(()=>{
-    const getUser = async () => {
-      const data = await getDocs(userCollection);
-      const userId = data.docs[0]._document.data.value.mapValue.fields.userId.stringValue;
-      setUserId(userId);
-      //console.log(data.docs[0]._document.data.value.mapValue.fields.{userId}.stringValue);
+  const userCollectionRef = collection(db, "users");
+  const uniqueId = useId();
+
+  useEffect(() => {
+    const getUsers = async () => {
+      const data = await getDocs(userCollectionRef);
+      setUsers(data.docs.map((doc)=>({ ...doc.data(), id: doc.id})))
     }
-    getUser();
-  },[])
+
+    getUsers();
+  }, []);
 
 
-  return (
-    <div className="App">
-        <Login/>
-    {
-      userId == 'master' ? <div>{userId} 성공</div> : <div>아이디를 잘못 입력하셨습니다.</div>
-    }
+
+  const createUser = async () => {
+    await addDoc(userCollectionRef, { name: newName, password: newPassword });
+    alert("클릭완료");
+  };
+
+  // const updateUser = async (name, password) => {
+  //   const userDoc = doc(db, "users", name);
+  //   const newField = {name : newName + password};
+  //   await updateDoc(userDoc, newField);
+  // }
+
+  const showUsers = users.map((value) => (
+    <div key={uniqueId}>
+      <h6>Name: {value.name}</h6>
+      <h6>passwordassword: {value.password}</h6>
+      {/* <button onClick={()=>{updateUser(value.name, value.password)}}>Btn</button> */}
     </div>
+  ));
+  return (
+    <>
+      <div className="App">
+        <input
+          type="text"
+          onChange={(event) => {
+            setNewName(event.target.value);
+          }}
+        />
+        <input
+          type="text"
+          onChange={(event) => {
+            setNewPassword(event.target.value);
+          }}
+        />
+        <button onClick={createUser}>가입</button>
+        {showUsers}
+      </div>
+    </>
   );
 }
 
